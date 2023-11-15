@@ -45,6 +45,8 @@ static int ax88179a_chk_eee(struct ax_device *axdev)
 {
 	struct ethtool_cmd ecmd = { .cmd = ETHTOOL_GSET };
 
+	DEBUG_PRINTK("ax88179a_chk_eee(%p)", axdev);
+
 	mii_ethtool_gset(&axdev->mii, &ecmd);
 
 	if (ecmd.speed == SPEED_1000) {
@@ -89,6 +91,8 @@ static int ax88179a_ethtool_get_eee(struct ax_device *axdev,
 {
 	int val;
 
+	DEBUG_PRINTK("ax88179a_ethtool_get_eee(%p, %p)", axdev, data);
+
 	val = ax_mmd_read(axdev->netdev, MDIO_MMD_PCS, MDIO_PCS_EEE_ABLE);
 	if (val < 0)
 		return val;
@@ -110,6 +114,8 @@ static int ax88179a_ethtool_get_eee(struct ax_device *axdev,
 
 static int ax88179a_get_eee(struct net_device *net, struct ethtool_eee *edata)
 {
+	DEBUG_PRINTK("ax88179a_get_eee(%p, %p)", net, edata);
+
 	struct ax_device *axdev = netdev_priv(net);
 
 	edata->eee_enabled = axdev->eee_enabled;
@@ -120,12 +126,16 @@ static int ax88179a_get_eee(struct net_device *net, struct ethtool_eee *edata)
 
 static void ax88179a_eee_setting(struct ax_device *axdev, bool enable)
 {
+	DEBUG_PRINTK("ax88179a_eee_setting(%p, %d)", axdev, enable);
+
 	ax_write_cmd(axdev, AX88179_GPHY_CTRL, AX_GPHY_EEE_CTRL,
 		     enable, 0, NULL);
 }
 
 static int ax88179a_set_eee(struct net_device *net, struct ethtool_eee *edata)
 {
+	DEBUG_PRINTK("ax88179a_set_eee(%p, %p)", net, edata);
+
 	struct ax_device *axdev = netdev_priv(net);
 
 	if (edata->advertised & MDIO_EEE_100TX)
@@ -301,6 +311,8 @@ void ax88179a_get_fw_version(struct ax_device *axdev)
 {
 	int i;
 
+	DEBUG_PRINTK("ax88179a_get_fw_version(%p)", axdev);
+
 	for (i = 0; i < 3; i++) {
 		if (ax_read_cmd(axdev, AX88179A_ACCESS_BL, (0xFD + i),
 				1, 1, &axdev->fw_version[i], 1) < 0) {
@@ -317,6 +329,8 @@ void ax88179a_get_fw_version(struct ax_device *axdev)
 
 int ax88179a_signature(struct ax_device *axdev, struct _ax_ioctl_command *info)
 {
+	DEBUG_PRINTK("ax88179a_signature(%p, %p)", axdev, info);
+
 	strncpy(info->sig, AX88179A_SIGNATURE, strlen(AX88179A_SIGNATURE));
 	return 0;
 }
@@ -778,6 +792,8 @@ int ax88179a_ioctl(struct net_device *netdev, struct ifreq *rq, int cmd)
 #else
 int ax88179a_ioctl(struct net_device *netdev, struct ifreq *rq, int cmd)
 {
+	DEBUG_PRINTK("ax88179a_ioctl(%p, %p, %d)", netdev, rq, cmd);
+
 	struct ax_device *axdev = netdev_priv(netdev);
 	struct _ax_ioctl_command info;
 	void __user *uptr = (void __user *) rq->ifr_data;
@@ -813,6 +829,8 @@ int ax88179a_ioctl(struct net_device *netdev, struct ifreq *rq, int cmd)
 
 static int ax88179a_autodetach(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax88179a_autodetach(%p)", axdev);
+
 	u16 value = ((axdev->autodetach) ? 1 : 0) | AX88179A_AUTODETACH_DELAY;
 
 	return ax_write_cmd(axdev, AX88179A_AUTODETACH, value, 0, 0, NULL);
@@ -820,6 +838,8 @@ static int ax88179a_autodetach(struct ax_device *axdev)
 
 static bool ax88179a_check_phy_power(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax88179a_check_phy_power(%p)", axdev);
+
 	u8 reg8 = 0;
 	int ret = 0;
 
@@ -832,6 +852,8 @@ static bool ax88179a_check_phy_power(struct ax_device *axdev)
 
 static int ax88179a_set_phy_power(struct ax_device *axdev, bool on)
 {
+	DEBUG_PRINTK("ax88179a_set_phy_power(%p, %d)", axdev, on);
+
 	u8 reg8;
 	int ret;
 
@@ -852,6 +874,8 @@ static int ax88179a_set_phy_power(struct ax_device *axdev, bool on)
 
 static int ax88179a_bind(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax88179a_bind(%p)", axdev);
+
 	struct net_device *netdev = axdev->netdev;
 	u16 wvalue = 0;
 	int ret;
@@ -934,6 +958,8 @@ static void ax88179a_unbind(struct ax_device *axdev)
 
 static int ax88179a_stop(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax88179a_stop(%p)", axdev);
+
 	u16 reg16;
 
 	reg16 = AX_RX_CTL_STOP;
@@ -948,6 +974,8 @@ static int ax88179a_stop(struct ax_device *axdev)
 
 void ax88179a_set_multicast(struct net_device *netdev)
 {
+	DEBUG_PRINTK("ax88179a_set_multicast(%p)", netdev);
+
 	struct ax_device *axdev = netdev_priv(netdev);
 	u8 *m_filter = axdev->m_filter;
 	int mc_count = 0;
@@ -1009,6 +1037,8 @@ void ax88179a_set_multicast(struct net_device *netdev)
 
 static int ax88179a_hw_init(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax88179a_hw_init(%p)", axdev);
+
 	u16 reg16;
 	u8 reg8;
 	int ret;
@@ -1186,6 +1216,8 @@ static int ax88179a_hw_init(struct ax_device *axdev)
 
 static int ax88179a_get_ether_link(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax88179a_get_ether_link(%p)", axdev);
+
 	struct ax_link_info *link_info = &axdev->link_info;
 #if KERNEL_VERSION(4, 10, 0) > LINUX_VERSION_CODE
 	struct ethtool_cmd cmd;
@@ -1229,6 +1261,8 @@ static int ax88179a_get_ether_link(struct ax_device *axdev)
 
 static int ax88179a_set_bulkin_setting(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax88179a_set_bulkin_setting(%p)", axdev);
+
 	struct ax_link_info *link_info = &axdev->link_info;
 	u8 link_sts;
 	int index = 0, ret;
@@ -1284,6 +1318,8 @@ static int ax88179a_set_bulkin_setting(struct ax_device *axdev)
 
 static int ax88179a_link_setting(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax88179a_link_setting(%p)", axdev);
+
 	struct ax_link_info *link_info = &axdev->link_info;
 	u16 medium_mode, reg16;
 	u8 reg8[3];
@@ -1396,6 +1432,8 @@ static int ax88179a_link_setting(struct ax_device *axdev)
 
 static int ax88179a_link_reset(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax88179a_link_reset(%p)", axdev);
+
 	int ret;
 
 	ret = ax88179a_get_ether_link(axdev);
@@ -1754,6 +1792,8 @@ static int ax88279_link_reset(struct ax_device *axdev)
 #endif
 inline void ax88179a_rx_checksum(struct sk_buff *skb, void *pkt_hdr)
 {
+	DEBUG_PRINTK("ax88179a_rx_checksum(%p, %p)", skb, pkt_hdr);
+
 	struct _179a_rx_pkt_header *hdr = (struct _179a_rx_pkt_header *)pkt_hdr;
 
 	skb->ip_summed = CHECKSUM_NONE;
@@ -1770,6 +1810,8 @@ inline void ax88179a_rx_checksum(struct sk_buff *skb, void *pkt_hdr)
 static void ax88179a_rx_fixup(struct ax_device *axdev, struct rx_desc *desc,
 			      int *work_done, int budget)
 {
+	DEBUG_PRINTK("ax88179a_rx_fixup(%p, %p, %p, %d)", axdev, desc, work_done, budget);
+
 #ifndef ENABLE_RX_TASKLET
 	struct napi_struct *napi = &axdev->napi;
 #endif
@@ -1864,6 +1906,8 @@ find_next_rx:
 
 static int ax88179a_tx_fixup(struct ax_device *axdev, struct tx_desc *desc)
 {
+	DEBUG_PRINTK("ax88179a_tx_fixup(%p, %p)", axdev, desc);
+
 	struct sk_buff_head skb_head, *tx_queue;
 	struct net_device_stats *stats = &axdev->netdev->stats;
 	int remain, ret;
@@ -1970,6 +2014,8 @@ static int ax88179a_system_suspend(struct ax_device *axdev)
 
 static int ax88179a_system_resume(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax88179a_system_resume(%p)", axdev);
+
 	int ret;
 
 	if (!ax88179a_check_phy_power(axdev))
@@ -1986,6 +2032,8 @@ static int ax88179a_system_resume(struct ax_device *axdev)
 
 static int ax88179a_runtime_suspend(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax88179a_runtime_suspend(%p)", axdev);
+
 	u16 reg16, medium_mode;
 	u8 reg8, loop = 100;
 
@@ -2050,6 +2098,8 @@ static int ax88179a_runtime_suspend(struct ax_device *axdev)
 
 static int ax88179a_runtime_resume(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax88179a_runtime_resume(%p)", axdev);
+
 	struct ax_link_info *link_info = &axdev->link_info;
 	u16 reg16, medium_mode;
 	u8 reg8;

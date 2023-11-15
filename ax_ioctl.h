@@ -17,13 +17,8 @@
 #ifndef __ASIX_IOCTL_H
 #define __ASIX_IOCTL_H
 
-#ifdef ENABLE_IOCTL_DEBUG
 #define DEBUG_PRINT(fmt, args...) printf(fmt, ## args)
 #define DEBUG_PRINTK(fmt, args...) pr_warn(fmt "\n", ## args)
-#else
-#define DEBUG_PRINT(fmt, args...)
-#define DEBUG_PRINTK(fmt, args...)
-#endif
 
 // CHANGE NETWORK INTERFACE WAY
 // DEFAULT_SCAN   : scan "eth0" - "eth255"

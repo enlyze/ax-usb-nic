@@ -699,6 +699,8 @@ int ax_mmd_read(struct net_device *netdev, int dev_addr, int reg)
 	struct ax_device *axdev = netdev_priv(netdev);
 	u16 res = 0;
 
+	DEBUG_PRINTK("ax_mmd_read(%p, %d, %d)", netdev, dev_addr, reg);
+
 	ax_read_cmd(axdev, AX88179A_PHY_CLAUSE45, (__u16)dev_addr,
 		    (__u16)reg, 2, &res, 1);
 
@@ -710,6 +712,8 @@ void ax_mmd_write(struct net_device *netdev, int dev_addr, int reg, int val)
 	struct ax_device *axdev = netdev_priv(netdev);
 	u16 res = (u16)val;
 
+	DEBUG_PRINTK("ax_mmd_write(%p, %d, %d, %d)", netdev, dev_addr, reg, val);
+
 	ax_write_cmd(axdev, AX88179A_PHY_CLAUSE45, (__u16)dev_addr,
 		     (__u16)reg, 2, &res);
 }
@@ -718,6 +722,8 @@ int ax_mdio_read(struct net_device *netdev, int phy_id, int reg)
 {
 	struct ax_device *axdev = netdev_priv(netdev);
 	u16 res;
+
+	DEBUG_PRINTK("ax_mdio_read(%p, %d, %d)", netdev, phy_id, reg);
 
 	ax_read_cmd_nopm(axdev, AX_ACCESS_PHY, phy_id, (__u16)reg, 2, &res, 1);
 
@@ -729,11 +735,15 @@ void ax_mdio_write(struct net_device *netdev, int phy_id, int reg, int val)
 	struct ax_device *axdev = netdev_priv(netdev);
 	u16 res = (u16)val;
 
+	DEBUG_PRINTK("ax_mdio_write(%p, %d, %d, %d)", netdev, phy_id, reg, val);
+
 	ax_write_cmd_nopm(axdev, AX_ACCESS_PHY, phy_id, (__u16)reg, 2, &res);
 }
 
 static void ax_set_unplug(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax_set_unplug(%p)", axdev);
+
 	if (axdev->udev->state == USB_STATE_NOTATTACHED)
 		set_bit(AX_UNPLUG, &axdev->flags);
 }
@@ -741,6 +751,8 @@ static void ax_set_unplug(struct ax_device *axdev)
 static int ax_check_tx_queue_not_empty(struct ax_device *axdev)
 {
 	int i;
+
+	DEBUG_PRINTK("ax_check_tx_queue_not_empty(%p)", axdev);
 
 	for (i = (AX_TX_QUEUE_SIZE - 1); i >= 0; i--)
 		if (!skb_queue_empty(&axdev->tx_queue[i]))
@@ -752,6 +764,8 @@ static int ax_check_tx_queue_not_empty(struct ax_device *axdev)
 static bool ax_check_tx_queue_len(struct ax_device *axdev)
 {
 	int i;
+
+	DEBUG_PRINTK("ax_check_tx_queue_len(%p)", axdev);
 
 	for (i = 0; i < AX_TX_QUEUE_SIZE; i++)
 		if (skb_queue_len(&axdev->tx_queue[i]) > axdev->tx_qlen)
@@ -766,6 +780,8 @@ static void ax_read_bulk_callback(struct urb *urb)
 	int status = urb->status;
 	struct rx_desc *desc;
 	struct ax_device *axdev;
+
+	DEBUG_PRINTK("ax_read_bulk_callback(%p)", urb);
 
 	desc = urb->context;
 	if (!desc)
@@ -834,6 +850,8 @@ void ax_write_bulk_callback(struct urb *urb)
 	struct ax_device *axdev;
 	int status = urb->status;
 
+	DEBUG_PRINTK("ax_write_bulk_callback(%p)", urb);
+
 	desc = urb->context;
 	if (!desc)
 		return;
@@ -887,6 +905,8 @@ static void ax_intr_callback(struct urb *urb)
 	struct ax_device_int_data *event = NULL;
 	int status = urb->status;
 	int res;
+
+	DEBUG_PRINTK("ax_intr_callback(%p)", urb);
 
 	axdev = urb->context;
 	if (!axdev)
@@ -1013,6 +1033,8 @@ static void ax_free_buffer(struct ax_device *axdev)
 {
 	int i;
 
+	DEBUG_PRINTK("ax_free_buffer(%p)", axdev);
+
 	for (i = 0; i < AX88179_MAX_RX; i++) {
 		usb_free_urb(axdev->rx_list[i].urb);
 		axdev->rx_list[i].urb = NULL;
@@ -1047,6 +1069,8 @@ static int ax_alloc_buffer(struct ax_device *axdev)
 	struct urb *urb;
 	int node, i;
 	u8 *buf;
+
+	DEBUG_PRINTK("ax_alloc_buffer(%p)", axdev);
 
 	node = netdev->dev.parent ? dev_to_node(netdev->dev.parent) : -1;
 
@@ -1142,6 +1166,8 @@ static struct tx_desc *ax_get_tx_desc(struct ax_device *dev)
 	struct tx_desc *desc = NULL;
 	unsigned long flags;
 
+	DEBUG_PRINTK("ax_get_tx_desc(%p)", dev);
+
 	if (list_empty(&dev->tx_free))
 		return NULL;
 
@@ -1162,6 +1188,8 @@ static void ax_tx_bottom(struct ax_device *axdev)
 {
 	const struct driver_info *info = axdev->driver_info;
 	int ret;
+
+	DEBUG_PRINTK("ax_tx_bottom(%p)", axdev);
 
 	do {
 		struct tx_desc *desc;
@@ -1299,6 +1327,8 @@ static
 int ax_submit_rx(struct ax_device *dev, struct rx_desc *desc, gfp_t mem_flags)
 {
 	int ret;
+
+	DEBUG_PRINTK("ax_submit_rx(%p, %p, %d)", dev, desc, mem_flags);
 
 	if (test_bit(AX_UNPLUG, &dev->flags) ||
 	    !test_bit(AX_ENABLE, &dev->flags) ||
@@ -1465,12 +1495,16 @@ void ax_set_tx_qlen(struct ax_device *dev)
 {
 	struct net_device *netdev = dev->netdev;
 
+	DEBUG_PRINTK("ax_set_tx_qlen(%p)", dev);
+
 	dev->tx_qlen = AX88179_BUF_TX_SIZE / (netdev->mtu + ETH_FCS_LEN + 8);
 }
 
 static int ax_start_rx(struct ax_device *axdev)
 {
 	int i, ret = 0;
+
+	DEBUG_PRINTK("ax_start_rx(%p)", axdev);
 
 	INIT_LIST_HEAD(&axdev->rx_done);
 	for (i = 0; i < AX88179_MAX_RX; i++) {
@@ -1506,6 +1540,8 @@ static int ax_stop_rx(struct ax_device *axdev)
 {
 	int i;
 
+	DEBUG_PRINTK("ax_stop_rx(%p)", axdev);
+
 	for (i = 0; i < AX88179_MAX_RX; i++)
 		usb_kill_urb(axdev->rx_list[i].urb);
 
@@ -1518,6 +1554,8 @@ static int ax_stop_rx(struct ax_device *axdev)
 static void ax_disable(struct ax_device *axdev)
 {
 	int i;
+
+	DEBUG_PRINTK("ax_disable(%p)", axdev);
 
 	if (test_bit(AX_UNPLUG, &axdev->flags)) {
 		ax_drop_queued_tx(axdev);
@@ -1576,6 +1614,8 @@ static void ax_set_carrier(struct ax_device *axdev)
 #ifndef ENABLE_RX_TASKLET
 	struct napi_struct *napi = &axdev->napi;
 #endif
+
+	DEBUG_PRINTK("ax_set_carrier(%p)", axdev);
 
 	if (axdev->link) {
 		if (!netif_carrier_ok(netdev)) {
@@ -1639,6 +1679,8 @@ static void ax_set_carrier(struct ax_device *axdev)
 
 static inline void __ax_work_func(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("__ax_work_func(%p)", axdev);
+
 	if (test_bit(AX_UNPLUG, &axdev->flags) || !netif_running(axdev->netdev))
 		return;
 
@@ -1691,6 +1733,8 @@ out:
 
 static void ax_work_func_t(struct work_struct *work)
 {
+	DEBUG_PRINTK("ax_work_func_t(%p)", work);
+
 	struct ax_device *axdev = container_of(work,
 					       struct ax_device, schedule.work);
 
@@ -1704,6 +1748,8 @@ int ax_usb_command(struct ax_device *axdev, struct _ax_ioctl_command *info)
 	int err, timeout;
 	u16 size = usb_cmd->size;
 	u8 reqtype;
+
+	DEBUG_PRINTK("ax_usb_command(%p, %p)", axdev, info);
 
 	buf = kmemdup(&usb_cmd->cmd_data, size, GFP_KERNEL);
 	if (!buf)
@@ -1730,6 +1776,8 @@ int ax_usb_command(struct ax_device *axdev, struct _ax_ioctl_command *info)
 
 static int ax_open(struct net_device *netdev)
 {
+	DEBUG_PRINTK("ax_open(%p)", netdev);
+
 	struct ax_device *axdev = netdev_priv(netdev);
 	int res = 0;
 
@@ -1787,6 +1835,8 @@ out_free:
 
 static int ax_close(struct net_device *netdev)
 {
+	DEBUG_PRINTK("ax_close(%p)", netdev);
+
 	struct ax_device *axdev = netdev_priv(netdev);
 	int ret = 0;
 
@@ -1827,6 +1877,8 @@ static int ax_close(struct net_device *netdev)
 
 static int ax88179_change_mtu(struct net_device *net, int new_mtu)
 {
+	DEBUG_PRINTK("ax88179_change_mtu(%p, %d)", net, new_mtu);
+
 	struct ax_device *axdev = netdev_priv(net);
 	u16 reg16;
 
@@ -1854,6 +1906,8 @@ static int ax88179_change_mtu(struct net_device *net, int new_mtu)
 
 int ax_get_mac_pass(struct ax_device *axdev, u8 *mac)
 {
+	DEBUG_PRINTK("ax_get_mac_pass(%p, %p)", axdev, mac);
+
 #ifdef ENABLE_MAC_PASS
 	efi_char16_t name[] = L"MacAddressPassTemp";
 	efi_guid_t guid = EFI_GUID(0xe2a741d8, 0xedf5, 0x47a1,
@@ -1889,9 +1943,14 @@ int ax_get_mac_pass(struct ax_device *axdev, u8 *mac)
 
 int ax_check_ether_addr(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax_check_ether_addr(%p)", axdev);
+
 	u8 *addr = (u8 *)axdev->netdev->dev_addr;
 	u8 default_mac[6] = {0, 0x0e, 0xc6, 0x81, 0x79, 0x01};
 	u8 default_mac_178a[6] = {0, 0x0e, 0xc6, 0x81, 0x78, 0x01};
+
+	DEBUG_PRINTK("addr: %u:%u:%u:%u:%u:%u", addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
+	DEBUG_PRINTK("is_valid_ether_addr: %u", is_valid_ether_addr(addr));
 
 	if (((addr[0] == 0) && (addr[1] == 0) && (addr[2] == 0)) ||
 	    !is_valid_ether_addr(addr) ||
@@ -1912,6 +1971,8 @@ static int ax_get_chip_version(struct ax_device *axdev)
 {
 	int ret = 0;
 
+	DEBUG_PRINTK("ax_get_chip_version(%p)", axdev);
+
 	axdev->chip_version = AX_VERSION_INVALID;
 	ret = ax_read_cmd(axdev, AX_ACCESS_MAC, AX_CHIP_STATUS,
 			  1, 1, &axdev->chip_version, 0);
@@ -1924,6 +1985,8 @@ static int ax_get_chip_version(struct ax_device *axdev)
 
 static void ax_get_chip_subversion(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax_get_chip_subversion(%p)", axdev);
+
 	if (axdev->chip_version < AX_VERSION_AX88179A_772D) {
 		axdev->sub_version = 0;
 		return;
@@ -1936,6 +1999,8 @@ static void ax_get_chip_subversion(struct ax_device *axdev)
 
 static int ax_get_chip_feature(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax_get_chip_feature(%p)", axdev);
+
 	if (ax_get_chip_version(axdev))
 		return -ENODEV;
 
@@ -1949,6 +2014,8 @@ static int ax_get_chip_feature(struct ax_device *axdev)
 
 static int ax_get_mac_address(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax_get_mac_address(%p)", axdev);
+
 	struct net_device *netdev = axdev->netdev;
 
 	if (ax_read_cmd(axdev, AX_ACCESS_MAC, AX_NODE_ID, ETH_ALEN,
@@ -1977,6 +2044,8 @@ static int ax_get_mac_address(struct ax_device *axdev)
 
 static bool ax_can_wakeup(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax_can_wakeup(%p)", axdev);
+
 	struct usb_device *udev = axdev->udev;
 
 	return (udev->actconfig->desc.bmAttributes & USB_CONFIG_ATT_WAKEUP);
@@ -1984,6 +2053,8 @@ static bool ax_can_wakeup(struct ax_device *axdev)
 
 static int ax_probe(struct usb_interface *intf, const struct usb_device_id *id)
 {
+	DEBUG_PRINTK("ax_probe(%p, %p)", intf, id);
+
 	struct usb_device *udev = interface_to_usbdev(intf);
 	//struct usb_driver *driver = to_usb_driver(intf->dev.driver);
 	const struct driver_info *info;
@@ -2095,6 +2166,8 @@ out:
 
 static void ax_disconnect(struct usb_interface *intf)
 {
+	DEBUG_PRINTK("ax_disconnect(%p)", intf);
+
 	struct ax_device *axdev = usb_get_intfdata(intf);
 
 	usb_set_intfdata(intf, NULL);
@@ -2116,6 +2189,8 @@ static void ax_disconnect(struct usb_interface *intf)
 
 static int ax_pre_reset(struct usb_interface *intf)
 {
+	DEBUG_PRINTK("ax_pre_reset(%p)", intf);
+
 	struct ax_device *axdev = usb_get_intfdata(intf);
 	struct net_device *netdev;
 
@@ -2146,6 +2221,8 @@ static int ax_pre_reset(struct usb_interface *intf)
 
 static int ax_post_reset(struct usb_interface *intf)
 {
+	DEBUG_PRINTK("ax_post_reset(%p)", intf);
+
 	struct ax_device *axdev = usb_get_intfdata(intf);
 	struct net_device *netdev;
 
@@ -2190,6 +2267,8 @@ static int ax_post_reset(struct usb_interface *intf)
 
 static int ax_system_resume(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax_system_resume(%p)", axdev);
+
 	struct net_device *netdev = axdev->netdev;
 
 	netif_device_attach(netdev);
@@ -2211,6 +2290,8 @@ static int ax_system_resume(struct ax_device *axdev)
 
 static int ax_runtime_resume(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax_runtime_resume(%p)", axdev);
+
 	struct net_device *netdev = axdev->netdev;
 
 	if (netif_running(netdev) && (netdev->flags & IFF_UP)) {
@@ -2260,6 +2341,8 @@ static int ax_runtime_resume(struct ax_device *axdev)
 
 static int ax_system_suspend(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax_system_suspend(%p)", axdev);
+
 	struct net_device *netdev = axdev->netdev;
 	int ret = 0;
 
@@ -2306,6 +2389,8 @@ static int ax_system_suspend(struct ax_device *axdev)
 
 static int ax_runtime_suspend(struct ax_device *axdev)
 {
+	DEBUG_PRINTK("ax_runtime_suspend(%p)", axdev);
+
 	struct net_device *netdev = axdev->netdev;
 
 	set_bit(AX_SELECTIVE_SUSPEND, &axdev->flags);
@@ -2342,6 +2427,8 @@ static int ax_runtime_suspend(struct ax_device *axdev)
 
 static int ax_suspend(struct usb_interface *intf, pm_message_t message)
 {
+	DEBUG_PRINTK("ax_suspend(%p, %d)", intf, message);
+
 	struct ax_device *axdev = usb_get_intfdata(intf);
 	int ret;
 
@@ -2359,6 +2446,8 @@ static int ax_suspend(struct usb_interface *intf, pm_message_t message)
 
 static int ax_resume(struct usb_interface *intf)
 {
+	DEBUG_PRINTK("ax_resume(%p)", intf);
+
 	struct ax_device *axdev = usb_get_intfdata(intf);
 	int ret;
 
@@ -2376,6 +2465,8 @@ static int ax_resume(struct usb_interface *intf)
 
 static int ax_reset_resume(struct usb_interface *intf)
 {
+	DEBUG_PRINTK("ax_reset_resume(%p)", intf);
+
 	struct ax_device *axdev = usb_get_intfdata(intf);
 
 	clear_bit(AX_SELECTIVE_SUSPEND, &axdev->flags);

@@ -19,7 +19,7 @@
 
 #ifdef ENABLE_IOCTL_DEBUG
 #define DEBUG_PRINT(fmt, args...) printf(fmt, ## args)
-#define DEBUG_PRINTK(fmt, args...) printk(fmt "\n", ## args)
+#define DEBUG_PRINTK(fmt, args...) pr_warn(fmt "\n", ## args)
 #else
 #define DEBUG_PRINT(fmt, args...)
 #define DEBUG_PRINTK(fmt, args...)

@@ -50,6 +50,8 @@ static void ax_set_carrier(struct ax_device *axdev);
 
 void ax_get_drvinfo(struct net_device *net, struct ethtool_drvinfo *info)
 {
+	DEBUG_PRINTK("ax_get_drvinfo(%p, %p)", net, info);
+
 	struct ax_device *axdev = netdev_priv(net);
 
 	strscpy(info->driver, MODULENAME, sizeof(info->driver));
@@ -64,6 +66,8 @@ void ax_get_drvinfo(struct net_device *net, struct ethtool_drvinfo *info)
 #if KERNEL_VERSION(4, 10, 0) > LINUX_VERSION_CODE
 int ax_get_settings(struct net_device *netdev, struct ethtool_cmd *cmd)
 {
+	DEBUG_PRINTK("ax_get_settings(%p, %p)", netdev, cmd);
+
 	struct ax_device *axdev = netdev_priv(netdev);
 	int ret;
 
@@ -87,6 +91,8 @@ int ax_get_settings(struct net_device *netdev, struct ethtool_cmd *cmd)
 
 int ax_set_settings(struct net_device *netdev, struct ethtool_cmd *cmd)
 {
+	DEBUG_PRINTK("ax_set_settings(%p, %p)", netdev, cmd);
+
 	struct ax_device *axdev = netdev_priv(netdev);
 	int ret;
 
@@ -108,6 +114,8 @@ int ax_set_settings(struct net_device *netdev, struct ethtool_cmd *cmd)
 int ax_get_link_ksettings(struct net_device *netdev,
 			  struct ethtool_link_ksettings *cmd)
 {
+	DEBUG_PRINTK("ax_get_link_ksettings(%p, %p)", netdev, cmd);
+
 	struct ax_device *axdev = netdev_priv(netdev);
 	int ret;
 
@@ -150,6 +158,8 @@ int ax_get_link_ksettings(struct net_device *netdev,
 int ax_set_link_ksettings(struct net_device *netdev,
 			  const struct ethtool_link_ksettings *cmd)
 {
+	DEBUG_PRINTK("ax_set_link_ksettings(%p, %p)", netdev, cmd);
+
 	struct ax_device *axdev = netdev_priv(netdev);
 	int ret;
 
@@ -170,6 +180,8 @@ int ax_set_link_ksettings(struct net_device *netdev,
 #endif
 u32 ax_get_msglevel(struct net_device *netdev)
 {
+	DEBUG_PRINTK("ax_get_msglevel(%p)", netdev);
+
 	struct ax_device *axdev = netdev_priv(netdev);
 
 	return axdev->msg_enable;
@@ -177,6 +189,8 @@ u32 ax_get_msglevel(struct net_device *netdev)
 
 void ax_set_msglevel(struct net_device *netdev, u32 value)
 {
+	DEBUG_PRINTK("ax_set_msglevel(%p, %u)", netdev, value);
+
 	struct ax_device *axdev = netdev_priv(netdev);
 
 	axdev->msg_enable = value;
@@ -184,6 +198,8 @@ void ax_set_msglevel(struct net_device *netdev, u32 value)
 
 void ax_get_wol(struct net_device *netdev, struct ethtool_wolinfo *wolinfo)
 {
+	DEBUG_PRINTK("ax_get_wol(%p, %p)", netdev, wolinfo);
+
 	struct ax_device *axdev = netdev_priv(netdev);
 	u8 reg8;
 	int ret;
@@ -206,6 +222,8 @@ void ax_get_wol(struct net_device *netdev, struct ethtool_wolinfo *wolinfo)
 
 int ax_set_wol(struct net_device *netdev, struct ethtool_wolinfo *wolinfo)
 {
+	DEBUG_PRINTK("ax_set_wol(%p, %p)", netdev, wolinfo);
+
 	struct ax_device *axdev = netdev_priv(netdev);
 	u8 reg8 = 0;
 	int ret;
@@ -246,6 +264,8 @@ static const char ax_gstrings[][ETH_GSTRING_LEN] = {
 
 int ax_get_sset_count(struct net_device *netdev, int sset)
 {
+	DEBUG_PRINTK("ax_get_sset_count(%p, %d)", netdev, sset);
+
 	switch (sset) {
 	case ETH_SS_STATS:
 		return ARRAY_SIZE(ax_gstrings);
@@ -256,6 +276,8 @@ int ax_get_sset_count(struct net_device *netdev, int sset)
 
 void ax_get_strings(struct net_device *netdev, u32 stringset, u8 *data)
 {
+	DEBUG_PRINTK("ax_get_strings(%p, %u, %p)", netdev, stringset, data);
+
 	switch (stringset) {
 	case ETH_SS_STATS:
 		memcpy(data, ax_gstrings, sizeof(ax_gstrings));
@@ -266,6 +288,8 @@ void ax_get_strings(struct net_device *netdev, u32 stringset, u8 *data)
 void ax_get_ethtool_stats(struct net_device *netdev,
 			  struct ethtool_stats *stats, u64 *data)
 {
+	DEBUG_PRINTK("ax_get_ethtool_stats(%p, %p, %p)", netdev, stats, data);
+
 	struct net_device_stats *net_stats = ax_get_stats(netdev);
 	struct ax_device *axdev = netdev_priv(netdev);
 	u64 *temp = data;
@@ -291,6 +315,8 @@ void ax_get_ethtool_stats(struct net_device *netdev,
 void ax_get_pauseparam(struct net_device *netdev,
 		       struct ethtool_pauseparam *pause)
 {
+	DEBUG_PRINTK("ax_get_pauseparam(%p, %p)", netdev, pause);
+
 	struct ax_device *axdev = netdev_priv(netdev);
 	u16 bmcr, lcladv, rmtadv;
 	u8 cap;
@@ -325,6 +351,8 @@ void ax_get_pauseparam(struct net_device *netdev,
 int ax_set_pauseparam(struct net_device *netdev,
 		      struct ethtool_pauseparam *pause)
 {
+	DEBUG_PRINTK("ax_set_pauseparam(%p, %p)", netdev, pause);
+
 	struct ax_device *axdev = netdev_priv(netdev);
 	u16 old, new1, bmcr;
 	u8 cap = 0;
@@ -370,6 +398,8 @@ int ax_get_regs_len(struct net_device *netdev)
 void ax_get_regs(struct net_device *netdev,
 		 struct ethtool_regs *regs, void *buf)
 {
+	DEBUG_PRINTK("ax_get_regs(%p, %p, %p)", netdev, regs, buf);
+
 	u8 *data = (u8 *)buf;
 	int i;
 	struct ax_device *axdev = netdev_priv(netdev);
@@ -381,6 +411,8 @@ void ax_get_regs(struct net_device *netdev,
 static int __ax_usb_read_cmd(struct ax_device *axdev, u8 cmd, u8 reqtype,
 			     u16 value, u16 index, void *data, u16 size)
 {
+	DEBUG_PRINTK("__ax_usb_read_cmd(%p, %u, %u, %u, %u, %p, %u)", axdev, cmd, reqtype, value, index, data, size);
+
 	void *buf = NULL;
 	int err = -ENOMEM;
 
@@ -409,6 +441,8 @@ out:
 static int __ax_usb_write_cmd(struct ax_device *axdev, u8 cmd, u8 reqtype,
 			      u16 value, u16 index, const void *data, u16 size)
 {
+	DEBUG_PRINTK("__ax_usb_write_cmd(%p, %u, %u, %u, %u, %p, %u)", axdev, cmd, reqtype, value, index, data, size);
+
 	void *buf = NULL;
 	int err = -ENOMEM;
 
@@ -436,6 +470,8 @@ out:
 static int __ax_read_cmd(struct ax_device *axdev, u8 cmd, u8 reqtype,
 			 u16 value, u16 index, void *data, u16 size)
 {
+	DEBUG_PRINTK("__ax_read_cmd(%p, %u, %u, %u, %u, %p, %u)", axdev, cmd, reqtype, value, index, data, size);
+
 	int ret;
 
 	if (usb_autopm_get_interface(axdev->intf) < 0)
@@ -452,6 +488,8 @@ static int __ax_read_cmd(struct ax_device *axdev, u8 cmd, u8 reqtype,
 static int __ax_write_cmd(struct ax_device *axdev, u8 cmd, u8 reqtype,
 			  u16 value, u16 index, const void *data, u16 size)
 {
+	DEBUG_PRINTK("__ax_write_cmd(%p, %u, %u, %u, %u, %p, %u)", axdev, cmd, reqtype, value, index, data, size);
+
 	int ret;
 
 	if (usb_autopm_get_interface(axdev->intf) < 0)
@@ -468,6 +506,8 @@ static int __ax_write_cmd(struct ax_device *axdev, u8 cmd, u8 reqtype,
 static int __ax_read_cmd_nopm(struct ax_device *axdev, u8 cmd, u8 reqtype,
 			      u16 value, u16 index, void *data, u16 size)
 {
+	DEBUG_PRINTK("__ax_read_cmd_nopm(%p, %u, %u, %u, %u, %p, %u)", axdev, cmd, reqtype, value, index, data, size);
+
 	return __ax_usb_read_cmd(axdev, cmd, reqtype, value, index,
 				 data, size);
 }
@@ -476,6 +516,8 @@ static int __ax_write_cmd_nopm(struct ax_device *axdev, u8 cmd, u8 reqtype,
 			       u16 value, u16 index, const void *data,
 			       u16 size)
 {
+	DEBUG_PRINTK("__ax_write_cmd_nopm(%p, %u, %u, %u, %u, %p, %u)", axdev, cmd, reqtype, value, index, data, size);
+
 	return __ax_usb_write_cmd(axdev, cmd, reqtype, value, index,
 				  data, size);
 }
@@ -483,6 +525,8 @@ static int __ax_write_cmd_nopm(struct ax_device *axdev, u8 cmd, u8 reqtype,
 static int __asix_read_cmd(struct ax_device *axdev, u8 cmd, u16 value,
 			   u16 index, u16 size, void *data, int in_pm)
 {
+	DEBUG_PRINTK("__asix_read_cmd(%p, %u, %u, %u, %u, %p, %d)", axdev, cmd, value, index, size, data, in_pm);
+
 	int ret;
 	_usb_read_function fn;
 
@@ -505,6 +549,8 @@ static int __asix_read_cmd(struct ax_device *axdev, u8 cmd, u16 value,
 static int __asix_write_cmd(struct ax_device *axdev, u8 cmd, u16 value,
 			    u16 index, u16 size, void *data, int in_pm)
 {
+	DEBUG_PRINTK("__asix_write_cmd(%p, %u, %u, %u, %u, %p, %d)", axdev, cmd, value, index, size, data, in_pm);
+
 	int ret;
 	_usb_write_function fn;
 
@@ -527,6 +573,8 @@ static int __asix_write_cmd(struct ax_device *axdev, u8 cmd, u16 value,
 int ax_read_cmd_nopm(struct ax_device *dev, u8 cmd, u16 value,
 		     u16 index, u16 size, void *data, int eflag)
 {
+	DEBUG_PRINTK("ax_read_cmd_nopm(%p, %u, %u, %u, %u, %p, %d)", dev, cmd, value, index, size, data, eflag);
+
 	int ret;
 
 	if (eflag && (size == 2)) {
@@ -551,6 +599,8 @@ int ax_read_cmd_nopm(struct ax_device *dev, u8 cmd, u16 value,
 int ax_write_cmd_nopm(struct ax_device *dev, u8 cmd, u16 value,
 		      u16 index, u16 size, void *data)
 {
+	DEBUG_PRINTK("ax_write_cmd_nopm(%p, %u, %u, %u, %u, %p)", dev, cmd, value, index, size, data);
+
 	int ret;
 
 	if (size == 2) {
@@ -571,6 +621,8 @@ int ax_write_cmd_nopm(struct ax_device *dev, u8 cmd, u16 value,
 int ax_read_cmd(struct ax_device *dev, u8 cmd, u16 value, u16 index, u16 size,
 		void *data, int eflag)
 {
+	DEBUG_PRINTK("ax_read_cmd(%p, %u, %u, %u, %u, %p, %d)", dev, cmd, value, index, size, data, eflag);
+
 	int ret;
 
 	if (eflag && (size == 2)) {
@@ -595,6 +647,8 @@ int ax_read_cmd(struct ax_device *dev, u8 cmd, u16 value, u16 index, u16 size,
 int ax_write_cmd(struct ax_device *dev, u8 cmd, u16 value, u16 index, u16 size,
 		 void *data)
 {
+	DEBUG_PRINTK("ax_write_cmd(%p, %u, %u, %u, %u, %p)", dev, cmd, value, index, size, data);
+
 	int ret;
 
 	if (size == 2) {
@@ -618,6 +672,8 @@ static void ax_async_write_callback(struct urb *urb, struct pt_regs *regs)
 static void ax_async_write_callback(struct urb *urb)
 #endif
 {
+	DEBUG_PRINTK("ax_async_write_callback(%p)", urb);
+
 	struct _async_cmd_handle *asyncdata = (typeof(asyncdata))urb->context;
 
 	if (urb->status < 0)
@@ -633,6 +689,8 @@ static void ax_async_write_callback(struct urb *urb)
 int ax_write_cmd_async(struct ax_device *axdev, u8 cmd, u16 value, u16 index,
 		       u16 size, void *data)
 {
+	DEBUG_PRINTK("ax_write_cmd_async(%p, %u, %u, %u, %u, %p)", axdev, cmd, value, index, size, data);
+
 	struct usb_ctrlrequest *req = NULL;
 	int status = 0;
 	struct urb *urb = NULL;

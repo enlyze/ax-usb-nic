@@ -1039,10 +1039,12 @@ static int ax88179a_hw_init(struct ax_device *axdev)
 				     MII_CTRL1000);
 		ax_mdio_write(axdev->netdev, axdev->mii.phy_id, MII_CTRL1000,
 			      (reg16 | CTL1000_AS_MASTER));
-		ax_mdio_write(axdev->netdev, axdev->mii.phy_id, 0,
-			      (BMCR_ANRESTART | BMCR_ANENABLE));
 	}
 #endif
+
+	ax_mdio_write(axdev->netdev, axdev->mii.phy_id, 0,
+		      (BMCR_ANRESTART | BMCR_ANENABLE));
+
 	ret = ax88179a_autodetach(axdev);
 	if (ret < 0)
 		return ret;

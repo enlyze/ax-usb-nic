@@ -1,4 +1,4 @@
-# ENLYZE Makefile for integration into yocto-spark, building only the AX88179/AX88179A module (without support for AX88279), in its default configuration
+# ENLYZE Makefile for integration into yocto-spark, building only the AX88179/AX88179A/AX88179B module (without support for AX88279), in its default configuration
 # Original Makefile by ASIX is preserved in Makefile.orig
 
 TARGET := ax_usb_nic

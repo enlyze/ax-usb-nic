@@ -2019,34 +2019,31 @@ int ax_get_mac_pass(struct ax_device *axdev, u8 *mac)
 	return 0;
 }
 
-int ax_check_ether_addr(struct ax_device *axdev)
+int ax_check_ether_addr(struct ax_device *axdev, u8 *addr)
 {
-	u8 *addr = (u8 *)axdev->netdev->dev_addr;
 	u8 default_mac[6] = {0, 0x0e, 0xc6, 0x81, 0x79, 0x01};
 	u8 default_mac_178a[6] = {0, 0x0e, 0xc6, 0x81, 0x78, 0x01};
 
 	if (((addr[0] == 0) && (addr[1] == 0) && (addr[2] == 0)) ||
 	    !is_valid_ether_addr(addr) ||
-	    !memcmp(axdev->netdev->dev_addr, default_mac, ETH_ALEN) ||
-	    !memcmp(axdev->netdev->dev_addr, default_mac_178a, ETH_ALEN)) {
-		u8 new_addr[6];
+	    !memcmp(addr, default_mac, ETH_ALEN) ||
+	    !memcmp(addr, default_mac_178a, ETH_ALEN)) {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 6, 0)
-		eth_random_addr(new_addr);
+		eth_random_addr(addr);
 #else
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 4, 0)
-	eth_hw_addr_random(new_addr);
+	eth_hw_addr_random(addr);
 #else
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 36)
 	axdev->netdev->addr_assign_type |= NET_ADDR_RANDOM;
 #endif
-random_ether_addr(new_addr);
+random_ether_addr(addr);
 #endif		
 #endif
 
-		new_addr[0] = 0;
-		new_addr[1] = 0x0E;
-		new_addr[2] = 0xC6;
-		dev_addr_set(axdev->netdev, new_addr);
+		addr[0] = 0;
+		addr[1] = 0x0E;
+		addr[2] = 0xC6;
 
 		return -EADDRNOTAVAIL;
 	}
@@ -2104,7 +2101,7 @@ static int ax_get_mac_address(struct ax_device *axdev)
 		return -ENODEV;
 	}
 
-	if (ax_check_ether_addr(axdev))
+	if (ax_check_ether_addr(axdev, addr))
 		dev_warn(&axdev->intf->dev, "Found invalid MAC address value");
 
 	ax_get_mac_pass(axdev, addr);
